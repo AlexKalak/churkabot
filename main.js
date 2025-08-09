@@ -142,7 +142,7 @@ const getAvailableSizes = async (browser, url) => {
 
   // 3. Extract the data
   const data = await page.evaluate(() => {
-    const sizeBlocks = Array.from(document.querySelectorAll('.size-selector-desktop-pdp__sizes li:not(.is-csbs) .text'));
+    const sizeBlocks = Array.from(document.querySelectorAll('.size-selector-desktop-pdp__sizes li:not(.is-disabled):not(.is-csbs) .text'));
     //const sizeBlocks = Array.from(document.querySelectorAll('.size-selector-desktop-pdp__sizes li .text'));
     return sizeBlocks.map(item => item.textContent?.trim(" "));
   });
