@@ -138,7 +138,8 @@ const getAvailableSizes = async (browser, url) => {
 
   // 2. Wait for a specific selector to appear, ensuring content is rendered
   // Replace '.your-content-selector' with the actual CSS selector for the content you want
-  await delay(10000)
+  await page.waitForSelector(".product-actions__action--add-to-cart");
+  await delay(2000);
 
   // 3. Extract the data
   const data = await page.evaluate(() => {
@@ -169,10 +170,13 @@ const getMatchingSizes = (existingSizes, requiringSizes) => {
 
 }
 
-const parseSizes = async (browser) => {
+let browser = await puppeteer.launch({ headless: !!process.env.HEADLESS });
+
+const parseSizes = async () => {
 
   for (const [name, data] of Object.entries(clothes)) {
     try {
+      if (!browser) continue;
       let sizes = await getAvailableSizes(browser, data.url)
       const matchedSizes = getMatchingSizes(sizes, data.sizes)
       if (matchedSizes.length > 0) {
@@ -185,11 +189,17 @@ const parseSizes = async (browser) => {
   }
 }
 
-async function main() {
-  const browser = await puppeteer.launch({ headless: !!process.env.HEADLESS });
 
+async function main() {
   parseSizes(browser)
   setInterval(() => parseSizes(browser), delayForParsing)
+
+  setInterval(() => {
+    (async function() {
+      await browser.close()
+      browser = await puppeteer.launch({ headless: !!process.env.HEADLESS });
+    })();
+  }, 30 * 60 * 1000)
 };
 
 await main()
